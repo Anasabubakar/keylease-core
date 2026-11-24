@@ -92,6 +92,35 @@ fn setup_with_service(env: &Env) -> (Ctx<'_>, u64) {
     (ctx, service_id)
 }
 
+#[test]
+fn registry_views_return_typed_errors_for_missing_ids() {
+    let env = Env::default();
+    let ctx = setup(&env);
+    let registry = ctx.registry;
+    let missing_id = 1;
+
+    assert_eq!(
+        registry.try_get_service(&missing_id),
+        Err(Ok(Error::ServiceNotFound))
+    );
+    assert_eq!(
+        registry.try_get_lease(&missing_id),
+        Err(Ok(Error::LeaseNotFound))
+    );
+    assert_eq!(
+        registry.try_lease_status(&missing_id),
+        Err(Ok(Error::LeaseNotFound))
+    );
+    assert_eq!(
+        registry.try_remaining_calls(&missing_id),
+        Err(Ok(Error::LeaseNotFound))
+    );
+    assert_eq!(
+        registry.try_locked_balance(&missing_id),
+        Err(Ok(Error::LeaseNotFound))
+    );
+}
+
 fn endpoint_hash(env: &Env) -> BytesN<32> {
     BytesN::from_array(env, &[7u8; 32])
 }
